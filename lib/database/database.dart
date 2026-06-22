@@ -59,7 +59,8 @@ class Database extends _$Database {
         }
         if (from < 3) {
           await m.createTable(whitelists);
-          await m.createIndex(idxWhitelistDomain);
+          await m.createTable(processWhitelists);
+          try { await m.createIndex(idxWhitelistDomain); } catch (_) {}
         }
       },
       beforeOpen: (details) async {
