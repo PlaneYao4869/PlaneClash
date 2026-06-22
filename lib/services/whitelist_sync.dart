@@ -23,68 +23,96 @@ class WhitelistRuleSync {
     } catch (_) {}
   }
 
-  /// 延迟重载，避免频繁触发
+  /// 轻量重载，50ms 防抖
   static void _scheduleReload() {
     _reloadTimer?.cancel();
-    _reloadTimer = Timer(const Duration(milliseconds: 300), () async {
+    _reloadTimer = Timer(const Duration(milliseconds: 50), () {
       try {
         final ref = globalState.container;
-        _log('Calling applyProfile(force: true)...');
-        await ref.read(setupActionProvider.notifier).applyProfile(force: true);
-        _log('applyProfile done');
-      } catch (e, s) {
-        _log('Reload failed: $e\n$s');
+        _log('updateConfigDebounce...');
+        ref.read(setupActionProvider.notifier).updateConfigDebounce();
+      } catch (e) {
+        _log('Reload failed: $e');
       }
     });
   }
 
+  /// 增量同步：只处理变化的白名单项
   static Future<void> syncAll() async {
     _log('========== syncAll ==========');
 
-    // 1. 查询数据库
     final domains = await database.whitelistsDao.queryAll().get();
     final processes = await database.processWhitelistsDao.queryAll().get();
     final enabledDomains = domains.where((d) => d.enabled).toList();
     final enabledProcesses = processes.where((p) => p.enabled).toList();
-    _log('Domains: ${domains.length} (${enabledDomains.length} enabled)');
-    _log('Processes: ${processes.length} (${enabledProcesses.length} enabled)');
 
-    // 2. 删除旧的白名单规则
-    final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
-    final oldRuleIds = existingRules
-        .where((r) =>
-            (r.ruleAction == RuleAction.DOMAIN_SUFFIX ||
-             r.ruleAction == RuleAction.PROCESS_NAME) &&
-            r.ruleTarget == RuleTarget.DIRECT.name)
-        .map((r) => r.id)
-        .toList();
-    if (oldRuleIds.isNotEmpty) {
-      await database.rulesDao.delRules(oldRuleIds);
-      _log('Deleted ${oldRuleIds.length} old rules');
-    }
-
-    // 3. 添加启用的规则
-    int added = 0;
+    // 构建期望的规则集合
+    final desiredRules = <String, bool>{}; // key: "action:content", enabled
     for (final d in enabledDomains) {
-      await database.rulesDao.putGlobalRule(Rule(
-        ruleAction: RuleAction.DOMAIN_SUFFIX,
-        content: d.domain,
-        ruleTarget: RuleTarget.DIRECT.name,
-      ));
-      added++;
+      desiredRules['DOMAIN-SUFFIX:${d.domain}'] = true;
     }
     for (final p in enabledProcesses) {
+      desiredRules['PROCESS-NAME:${p.processName}'] = true;
+    }
+
+    // 获取现有规则
+    final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
+    final existingWhitelistRules = existingRules.where((r) =>
+        (r.ruleAction == RuleAction.DOMAIN_SUFFIX ||
+         r.ruleAction == RuleAction.PROCESS_NAME) &&
+        r.ruleTarget == RuleTarget.DIRECT.name).toList();
+
+    // 构建现有规则集合
+    final existingKeys = <String, int>{}; // key -> ruleId
+    for (final r in existingWhitelistRules) {
+      existingKeys['${r.ruleAction.name}:${r.content}'] = r.id;
+    }
+
+    // 找出需要删除的（现有但不在期望中）
+    final toDelete = <int>[];
+    for (final entry in existingKeys.entries) {
+      if (!desiredRules.containsKey(entry.key)) {
+        toDelete.add(entry.value);
+      }
+    }
+
+    // 找出需要添加的（期望但不在现有中）
+    final toAdd = <String>[];
+    for (final key in desiredRules.keys) {
+      if (!existingKeys.containsKey(key)) {
+        toAdd.add(key);
+      }
+    }
+
+    // 执行删除
+    if (toDelete.isNotEmpty) {
+      await database.rulesDao.delRules(toDelete);
+      _log('Deleted ${toDelete.length} rules');
+    }
+
+    // 执行添加
+    for (final key in toAdd) {
+      final parts = key.split(':');
+      final action = parts[0] == 'DOMAIN-SUFFIX'
+          ? RuleAction.DOMAIN_SUFFIX
+          : RuleAction.PROCESS_NAME;
+      final content = parts.sublist(1).join(':');
       await database.rulesDao.putGlobalRule(Rule(
-        ruleAction: RuleAction.PROCESS_NAME,
-        content: p.processName,
+        ruleAction: action,
+        content: content,
         ruleTarget: RuleTarget.DIRECT.name,
       ));
-      added++;
+      _log('Added: $key -> DIRECT');
     }
-    _log('Added $added rules');
 
-    // 4. 延迟重载（合并多次快速调用）
-    _scheduleReload();
+    final changed = toDelete.length + toAdd.length;
+    _log('Changed: $changed rules');
+
+    // 只有变化时才触发重载
+    if (changed > 0) {
+      _scheduleReload();
+    }
+
     _log('========== syncAll done ==========');
   }
 }
