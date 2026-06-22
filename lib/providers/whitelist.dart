@@ -25,7 +25,7 @@ class Whitelists extends _$Whitelists {
 
   Future<void> _syncRules() async {
     try {
-      await WhitelistRuleSync.syncWhitelistToRules();
+      await WhitelistRuleSync.syncDomainWhitelist();
     } catch (e) {
       print('Failed to sync whitelist rules: $e');
     }

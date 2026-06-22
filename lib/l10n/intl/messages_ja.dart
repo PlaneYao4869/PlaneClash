@@ -823,6 +823,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPN再起動後に有効"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
+    "whitelist": MessageLookupByLibrary.simpleMessage("ホワイトリスト"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "whitelistManagement": MessageLookupByLibrary.simpleMessage("ホワイトリスト管理"),
     "whitelistDesc": MessageLookupByLibrary.simpleMessage("プロキシを迂回するドメインを管理"),

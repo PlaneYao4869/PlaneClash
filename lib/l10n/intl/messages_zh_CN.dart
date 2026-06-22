@@ -711,6 +711,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
+    "whitelist": MessageLookupByLibrary.simpleMessage("白名单"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "whitelistManagement": MessageLookupByLibrary.simpleMessage("白名单管理"),
     "whitelistDesc": MessageLookupByLibrary.simpleMessage("管理需要绕过代理的域名"),

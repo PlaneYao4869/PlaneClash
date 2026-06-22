@@ -1021,6 +1021,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",
     ),
+    "whitelist": MessageLookupByLibrary.simpleMessage("Whitelist"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "whitelistManagement": MessageLookupByLibrary.simpleMessage("Whitelist Management"),
     "whitelistDesc": MessageLookupByLibrary.simpleMessage("Manage domains that should bypass the proxy"),
