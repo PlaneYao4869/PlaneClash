@@ -18,6 +18,7 @@ part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 part 'whitelists.dart';
+part 'process_whitelists.dart';
 
 @DriftDatabase(
   tables: [
@@ -28,8 +29,10 @@ part 'whitelists.dart';
     ProxyGroups,
     IconRecords,
     Whitelists,
+    ProcessWhitelists,
   ],
-  daos: [ProfilesDao, ScriptsDao, RulesDao, ProxyGroupsDao, IconRecordsDao, WhitelistsDao],
+  daos: [ProfilesDao, ScriptsDao, RulesDao, ProxyGroupsDao, IconRecordsDao, WhitelistsDao,
+    ProcessWhitelistsDao],
 )
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());

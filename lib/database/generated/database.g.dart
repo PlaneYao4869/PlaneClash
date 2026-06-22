@@ -3745,6 +3745,416 @@ class WhitelistsCompanion extends UpdateCompanion<RawWhitelist> {
   }
 }
 
+class $ProcessWhitelistsTable extends ProcessWhitelists
+    with TableInfo<$ProcessWhitelistsTable, RawProcessWhitelist> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProcessWhitelistsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _processNameMeta = const VerificationMeta(
+    'processName',
+  );
+  @override
+  late final GeneratedColumn<String> processName = GeneratedColumn<String>(
+    'process_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _exePathMeta = const VerificationMeta(
+    'exePath',
+  );
+  @override
+  late final GeneratedColumn<String> exePath = GeneratedColumn<String>(
+    'exe_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    processName,
+    exePath,
+    enabled,
+    description,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'process_whitelists';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RawProcessWhitelist> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('process_name')) {
+      context.handle(
+        _processNameMeta,
+        processName.isAcceptableOrUnknown(
+          data['process_name']!,
+          _processNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_processNameMeta);
+    }
+    if (data.containsKey('exe_path')) {
+      context.handle(
+        _exePathMeta,
+        exePath.isAcceptableOrUnknown(data['exe_path']!, _exePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_exePathMeta);
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RawProcessWhitelist map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RawProcessWhitelist(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      processName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}process_name'],
+      )!,
+      exePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}exe_path'],
+      )!,
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+    );
+  }
+
+  @override
+  $ProcessWhitelistsTable createAlias(String alias) {
+    return $ProcessWhitelistsTable(attachedDatabase, alias);
+  }
+}
+
+class RawProcessWhitelist extends DataClass
+    implements Insertable<RawProcessWhitelist> {
+  final int id;
+  final String processName;
+  final String exePath;
+  final bool enabled;
+  final String? description;
+  final DateTime? createdAt;
+  const RawProcessWhitelist({
+    required this.id,
+    required this.processName,
+    required this.exePath,
+    required this.enabled,
+    this.description,
+    this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['process_name'] = Variable<String>(processName);
+    map['exe_path'] = Variable<String>(exePath);
+    map['enabled'] = Variable<bool>(enabled);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    return map;
+  }
+
+  ProcessWhitelistsCompanion toCompanion(bool nullToAbsent) {
+    return ProcessWhitelistsCompanion(
+      id: Value(id),
+      processName: Value(processName),
+      exePath: Value(exePath),
+      enabled: Value(enabled),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+    );
+  }
+
+  factory RawProcessWhitelist.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RawProcessWhitelist(
+      id: serializer.fromJson<int>(json['id']),
+      processName: serializer.fromJson<String>(json['processName']),
+      exePath: serializer.fromJson<String>(json['exePath']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'processName': serializer.toJson<String>(processName),
+      'exePath': serializer.toJson<String>(exePath),
+      'enabled': serializer.toJson<bool>(enabled),
+      'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+    };
+  }
+
+  RawProcessWhitelist copyWith({
+    int? id,
+    String? processName,
+    String? exePath,
+    bool? enabled,
+    Value<String?> description = const Value.absent(),
+    Value<DateTime?> createdAt = const Value.absent(),
+  }) => RawProcessWhitelist(
+    id: id ?? this.id,
+    processName: processName ?? this.processName,
+    exePath: exePath ?? this.exePath,
+    enabled: enabled ?? this.enabled,
+    description: description.present ? description.value : this.description,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+  );
+  RawProcessWhitelist copyWithCompanion(ProcessWhitelistsCompanion data) {
+    return RawProcessWhitelist(
+      id: data.id.present ? data.id.value : this.id,
+      processName: data.processName.present
+          ? data.processName.value
+          : this.processName,
+      exePath: data.exePath.present ? data.exePath.value : this.exePath,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RawProcessWhitelist(')
+          ..write('id: $id, ')
+          ..write('processName: $processName, ')
+          ..write('exePath: $exePath, ')
+          ..write('enabled: $enabled, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, processName, exePath, enabled, description, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RawProcessWhitelist &&
+          other.id == this.id &&
+          other.processName == this.processName &&
+          other.exePath == this.exePath &&
+          other.enabled == this.enabled &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt);
+}
+
+class ProcessWhitelistsCompanion extends UpdateCompanion<RawProcessWhitelist> {
+  final Value<int> id;
+  final Value<String> processName;
+  final Value<String> exePath;
+  final Value<bool> enabled;
+  final Value<String?> description;
+  final Value<DateTime?> createdAt;
+  const ProcessWhitelistsCompanion({
+    this.id = const Value.absent(),
+    this.processName = const Value.absent(),
+    this.exePath = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  ProcessWhitelistsCompanion.insert({
+    this.id = const Value.absent(),
+    required String processName,
+    required String exePath,
+    this.enabled = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : processName = Value(processName),
+       exePath = Value(exePath);
+  static Insertable<RawProcessWhitelist> custom({
+    Expression<int>? id,
+    Expression<String>? processName,
+    Expression<String>? exePath,
+    Expression<bool>? enabled,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (processName != null) 'process_name': processName,
+      if (exePath != null) 'exe_path': exePath,
+      if (enabled != null) 'enabled': enabled,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  ProcessWhitelistsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? processName,
+    Value<String>? exePath,
+    Value<bool>? enabled,
+    Value<String?>? description,
+    Value<DateTime?>? createdAt,
+  }) {
+    return ProcessWhitelistsCompanion(
+      id: id ?? this.id,
+      processName: processName ?? this.processName,
+      exePath: exePath ?? this.exePath,
+      enabled: enabled ?? this.enabled,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (processName.present) {
+      map['process_name'] = Variable<String>(processName.value);
+    }
+    if (exePath.present) {
+      map['exe_path'] = Variable<String>(exePath.value);
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProcessWhitelistsCompanion(')
+          ..write('id: $id, ')
+          ..write('processName: $processName, ')
+          ..write('exePath: $exePath, ')
+          ..write('enabled: $enabled, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
@@ -3757,6 +4167,8 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ProxyGroupsTable proxyGroups = $ProxyGroupsTable(this);
   late final $IconRecordsTable iconRecords = $IconRecordsTable(this);
   late final $WhitelistsTable whitelists = $WhitelistsTable(this);
+  late final $ProcessWhitelistsTable processWhitelists =
+      $ProcessWhitelistsTable(this);
   late final Index idxRuleTarget = Index(
     'idx_rule_target',
     'CREATE INDEX idx_rule_target ON rules (rule_target)',
@@ -3777,12 +4189,19 @@ abstract class _$Database extends GeneratedDatabase {
     'idx_whitelist_domain',
     'CREATE INDEX idx_whitelist_domain ON whitelists (domain)',
   );
+  late final Index idxProcessWhitelistName = Index(
+    'idx_process_whitelist_name',
+    'CREATE INDEX idx_process_whitelist_name ON process_whitelists (process_name)',
+  );
   late final ProfilesDao profilesDao = ProfilesDao(this as Database);
   late final ScriptsDao scriptsDao = ScriptsDao(this as Database);
   late final RulesDao rulesDao = RulesDao(this as Database);
   late final ProxyGroupsDao proxyGroupsDao = ProxyGroupsDao(this as Database);
   late final IconRecordsDao iconRecordsDao = IconRecordsDao(this as Database);
   late final WhitelistsDao whitelistsDao = WhitelistsDao(this as Database);
+  late final ProcessWhitelistsDao processWhitelistsDao = ProcessWhitelistsDao(
+    this as Database,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3795,11 +4214,13 @@ abstract class _$Database extends GeneratedDatabase {
     proxyGroups,
     iconRecords,
     whitelists,
+    processWhitelists,
     idxRuleTarget,
     idxProfileSceneOrder,
     idxProfileNameOrder,
     lastAccessedUrl,
     idxWhitelistDomain,
+    idxProcessWhitelistName,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6323,6 +6744,236 @@ typedef $$WhitelistsTableProcessedTableManager =
       RawWhitelist,
       PrefetchHooks Function()
     >;
+typedef $$ProcessWhitelistsTableCreateCompanionBuilder =
+    ProcessWhitelistsCompanion Function({
+      Value<int> id,
+      required String processName,
+      required String exePath,
+      Value<bool> enabled,
+      Value<String?> description,
+      Value<DateTime?> createdAt,
+    });
+typedef $$ProcessWhitelistsTableUpdateCompanionBuilder =
+    ProcessWhitelistsCompanion Function({
+      Value<int> id,
+      Value<String> processName,
+      Value<String> exePath,
+      Value<bool> enabled,
+      Value<String?> description,
+      Value<DateTime?> createdAt,
+    });
+
+class $$ProcessWhitelistsTableFilterComposer
+    extends Composer<_$Database, $ProcessWhitelistsTable> {
+  $$ProcessWhitelistsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get processName => $composableBuilder(
+    column: $table.processName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get exePath => $composableBuilder(
+    column: $table.exePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProcessWhitelistsTableOrderingComposer
+    extends Composer<_$Database, $ProcessWhitelistsTable> {
+  $$ProcessWhitelistsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get processName => $composableBuilder(
+    column: $table.processName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get exePath => $composableBuilder(
+    column: $table.exePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProcessWhitelistsTableAnnotationComposer
+    extends Composer<_$Database, $ProcessWhitelistsTable> {
+  $$ProcessWhitelistsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get processName => $composableBuilder(
+    column: $table.processName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get exePath =>
+      $composableBuilder(column: $table.exePath, builder: (column) => column);
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ProcessWhitelistsTableTableManager
+    extends
+        RootTableManager<
+          _$Database,
+          $ProcessWhitelistsTable,
+          RawProcessWhitelist,
+          $$ProcessWhitelistsTableFilterComposer,
+          $$ProcessWhitelistsTableOrderingComposer,
+          $$ProcessWhitelistsTableAnnotationComposer,
+          $$ProcessWhitelistsTableCreateCompanionBuilder,
+          $$ProcessWhitelistsTableUpdateCompanionBuilder,
+          (
+            RawProcessWhitelist,
+            BaseReferences<
+              _$Database,
+              $ProcessWhitelistsTable,
+              RawProcessWhitelist
+            >,
+          ),
+          RawProcessWhitelist,
+          PrefetchHooks Function()
+        > {
+  $$ProcessWhitelistsTableTableManager(
+    _$Database db,
+    $ProcessWhitelistsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProcessWhitelistsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProcessWhitelistsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProcessWhitelistsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> processName = const Value.absent(),
+                Value<String> exePath = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+              }) => ProcessWhitelistsCompanion(
+                id: id,
+                processName: processName,
+                exePath: exePath,
+                enabled: enabled,
+                description: description,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String processName,
+                required String exePath,
+                Value<bool> enabled = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+              }) => ProcessWhitelistsCompanion.insert(
+                id: id,
+                processName: processName,
+                exePath: exePath,
+                enabled: enabled,
+                description: description,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProcessWhitelistsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$Database,
+      $ProcessWhitelistsTable,
+      RawProcessWhitelist,
+      $$ProcessWhitelistsTableFilterComposer,
+      $$ProcessWhitelistsTableOrderingComposer,
+      $$ProcessWhitelistsTableAnnotationComposer,
+      $$ProcessWhitelistsTableCreateCompanionBuilder,
+      $$ProcessWhitelistsTableUpdateCompanionBuilder,
+      (
+        RawProcessWhitelist,
+        BaseReferences<
+          _$Database,
+          $ProcessWhitelistsTable,
+          RawProcessWhitelist
+        >,
+      ),
+      RawProcessWhitelist,
+      PrefetchHooks Function()
+    >;
 
 class $DatabaseManager {
   final _$Database _db;
@@ -6341,6 +6992,8 @@ class $DatabaseManager {
       $$IconRecordsTableTableManager(_db, _db.iconRecords);
   $$WhitelistsTableTableManager get whitelists =>
       $$WhitelistsTableTableManager(_db, _db.whitelists);
+  $$ProcessWhitelistsTableTableManager get processWhitelists =>
+      $$ProcessWhitelistsTableTableManager(_db, _db.processWhitelists);
 }
 
 mixin _$ProfilesDaoMixin on DatabaseAccessor<Database> {
@@ -6426,4 +7079,20 @@ class WhitelistsDaoManager {
   WhitelistsDaoManager(this._db);
   $$WhitelistsTableTableManager get whitelists =>
       $$WhitelistsTableTableManager(_db.attachedDatabase, _db.whitelists);
+}
+
+mixin _$ProcessWhitelistsDaoMixin on DatabaseAccessor<Database> {
+  $ProcessWhitelistsTable get processWhitelists =>
+      attachedDatabase.processWhitelists;
+  ProcessWhitelistsDaoManager get managers => ProcessWhitelistsDaoManager(this);
+}
+
+class ProcessWhitelistsDaoManager {
+  final _$ProcessWhitelistsDaoMixin _db;
+  ProcessWhitelistsDaoManager(this._db);
+  $$ProcessWhitelistsTableTableManager get processWhitelists =>
+      $$ProcessWhitelistsTableTableManager(
+        _db.attachedDatabase,
+        _db.processWhitelists,
+      );
 }
