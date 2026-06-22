@@ -22,7 +22,7 @@ class ProcessWhitelists extends _$ProcessWhitelists {
 
   Future<void> _syncRules() async {
     try {
-      await WhitelistRuleSync.syncProcessWhitelist();
+      await WhitelistRuleSync.syncAll();
     } catch (e) {
       print('Failed to sync process whitelist rules: $e');
     }

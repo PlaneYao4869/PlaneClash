@@ -1,118 +1,105 @@
-import 'package:fl_clash/common/common.dart';
+import 'dart:io';
+
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/models/whitelist.dart';
-import 'package:fl_clash/models/process_whitelist.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'dart:io';
 
 class WhitelistRuleSync {
+  static final _logFile = File(
+    '${Platform.environment['TEMP'] ?? 'C:\Windows\Temp'}\flclash_whitelist.log',
+  );
+
   static Future<void> _log(String msg) async {
     try {
-      final file = File('${Platform.environment['TEMP'] ?? 'C:\\Windows\\Temp'}\\flclash_whitelist.log');
-      await file.writeAsString('${DateTime.now()}: $msg\n', mode: FileMode.append);
+      await _logFile.writeAsString(
+        '${DateTime.now()}: $msg\n',
+        mode: FileMode.append,
+      );
     } catch (_) {}
   }
 
-  /// 触发 Clash 配置重载
   static void _triggerReload() {
     try {
       final ref = globalState.container;
-      _log('Triggering config reload...');
-      // 用 applyProfileDebounce 强制重新应用配置（包括规则）
+      _log('Triggering applyProfile...');
       ref.read(setupActionProvider.notifier).applyProfileDebounce();
-      _log('Config reload triggered OK');
-    } catch (e) {
-      _log('Failed to trigger config reload: $e');
+      _log('applyProfile triggered');
+    } catch (e, s) {
+      _log('Reload failed: $e\n$s');
     }
   }
 
-  /// 同步域名白名单到 Clash 规则
-  static Future<void> syncDomainWhitelist() async {
-    _log('=== syncDomainWhitelist start ===');
-    final whitelists = await database.whitelistsDao.queryEnabled().get();
-    _log('Enabled domain whitelists: ${whitelists.length}');
+  static Future<void> syncAll() async {
+    _log('========== syncAll start ==========');
 
+    // 1. 查询数据库中的白名单
+    final domains = await database.whitelistsDao.queryAll().get();
+    final processes = await database.processWhitelistsDao.queryAll().get();
+    _log('DB domains: ${domains.length} (enabled: ${domains.where((d) => d.enabled).length})');
+    _log('DB processes: ${processes.length} (enabled: ${processes.where((p) => p.enabled).length})');
+
+    // 2. 查询现有规则
     final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
     _log('Existing global rules: ${existingRules.length}');
 
-    // 找出旧的域名白名单规则
-    final whitelistRuleIds = existingRules
-        .where((rule) =>
-            rule.ruleAction == RuleAction.DOMAIN_SUFFIX &&
-            rule.ruleTarget == RuleTarget.DIRECT.name &&
-            rule.content != null &&
-            whitelists.any((w) => w.domain == rule.content))
-        .map((rule) => rule.id)
+    // 3. 删除旧的白名单规则
+    final oldRuleIds = existingRules
+        .where((r) =>
+            (r.ruleAction == RuleAction.DOMAIN_SUFFIX ||
+             r.ruleAction == RuleAction.PROCESS_NAME) &&
+            r.ruleTarget == RuleTarget.DIRECT.name)
+        .map((r) => r.id)
         .toList();
-    _log('Old domain whitelist rules to remove: ${whitelistRuleIds.length}');
-
-    if (whitelistRuleIds.isNotEmpty) {
-      await database.rulesDao.delRules(whitelistRuleIds);
+    if (oldRuleIds.isNotEmpty) {
+      await database.rulesDao.delRules(oldRuleIds);
+      _log('Deleted ${oldRuleIds.length} old whitelist rules');
     }
 
+    // 4. 添加域名白名单规则
     int added = 0;
-    for (final whitelist in whitelists) {
-      final alreadyExists = existingRules.any((rule) =>
-          rule.ruleAction == RuleAction.DOMAIN_SUFFIX &&
-          rule.content == whitelist.domain &&
-          rule.ruleTarget == RuleTarget.DIRECT.name &&
-          !whitelistRuleIds.contains(rule.id));
-
-      if (!alreadyExists) {
-        final rule = Rule(
-          ruleAction: RuleAction.DOMAIN_SUFFIX,
-          content: whitelist.domain,
-          ruleTarget: RuleTarget.DIRECT.name,
-        );
-        await database.rulesDao.putGlobalRule(rule);
-        added++;
-        _log('Added domain rule: ${whitelist.domain} -> DIRECT');
-      }
-    }
-    _log('Domain sync done. Added: $added');
-    _triggerReload();
-  }
-
-  /// 同步进程白名单到 Clash 规则
-  static Future<void> syncProcessWhitelist() async {
-    _log('=== syncProcessWhitelist start ===');
-    final processWhitelists =
-        await database.processWhitelistsDao.queryEnabled().get();
-    _log('Enabled process whitelists: ${processWhitelists.length}');
-
-    final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
-
-    final processRuleIds = existingRules
-        .where((rule) =>
-            rule.ruleAction == RuleAction.PROCESS_NAME &&
-            rule.ruleTarget == RuleTarget.DIRECT.name)
-        .map((rule) => rule.id)
-        .toList();
-    _log('Old process rules to remove: ${processRuleIds.length}');
-
-    if (processRuleIds.isNotEmpty) {
-      await database.rulesDao.delRules(processRuleIds);
-    }
-
-    for (final pw in processWhitelists) {
-      final rule = Rule(
-        ruleAction: RuleAction.PROCESS_NAME,
-        content: pw.processName,
+    for (final d in domains.where((d) => d.enabled)) {
+      await database.rulesDao.putGlobalRule(Rule(
+        ruleAction: RuleAction.DOMAIN_SUFFIX,
+        content: d.domain,
         ruleTarget: RuleTarget.DIRECT.name,
-      );
-      await database.rulesDao.putGlobalRule(rule);
-      _log('Added process rule: ${pw.processName} -> DIRECT');
+      ));
+      _log('Added domain rule: ${d.domain} -> DIRECT');
+      added++;
     }
-    _log('Process sync done');
-    _triggerReload();
-  }
 
-  /// 同步所有白名单
-  static Future<void> syncAll() async {
-    await syncDomainWhitelist();
-    await syncProcessWhitelist();
+    // 5. 添加进程白名单规则
+    for (final p in processes.where((p) => p.enabled)) {
+      await database.rulesDao.putGlobalRule(Rule(
+        ruleAction: RuleAction.PROCESS_NAME,
+        content: p.processName,
+        ruleTarget: RuleTarget.DIRECT.name,
+      ));
+      _log('Added process rule: ${p.processName} -> DIRECT');
+      added++;
+    }
+
+    _log('Total rules added: $added');
+
+    // 6. 验证规则已写入
+    final verifyRules = await database.rulesDao.queryGlobalAddedRules().get();
+    final whitelistRules = verifyRules
+        .where((r) =>
+            r.ruleTarget == RuleTarget.DIRECT.name &&
+            (r.ruleAction == RuleAction.DOMAIN_SUFFIX ||
+             r.ruleAction == RuleAction.PROCESS_NAME))
+        .toList();
+    _log('Verified whitelist rules in DB: ${whitelistRules.length}');
+    for (final r in whitelistRules) {
+      _log('  - ${r.ruleAction.name} ${r.content} -> ${r.ruleTarget}');
+    }
+
+    // 7. 触发重载
+    if (added > 0) {
+      _triggerReload();
+    }
+
+    _log('========== syncAll end ==========');
   }
 }
