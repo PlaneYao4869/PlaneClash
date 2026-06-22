@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'whitelist.freezed.dart';
-part 'whitelist.g.dart';
+part 'generated/whitelist.freezed.dart';
+part 'generated/whitelist.g.dart';
 
 @freezed
 abstract class Whitelist with _$Whitelist {
