@@ -23,10 +23,10 @@ class WhitelistRuleSync {
     } catch (_) {}
   }
 
-  /// 延迟重载，500ms 防抖
+  /// 延迟重载，2秒防抖确保 Riverpod 流更新
   static void _scheduleReload() {
     _reloadTimer?.cancel();
-    _reloadTimer = Timer(const Duration(milliseconds: 500), () async {
+    _reloadTimer = Timer(const Duration(seconds: 2), () async {
       try {
         final ref = globalState.container;
         _log('Calling applyProfile(force: true)...');
@@ -49,10 +49,8 @@ class WhitelistRuleSync {
     _log('Domains: ${domains.length} (${enabledDomains.length} enabled)');
     _log('Processes: ${processes.length} (${enabledProcesses.length} enabled)');
 
-    // 获取现有规则
-    final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
-
     // 删除旧的白名单规则
+    final existingRules = await database.rulesDao.queryGlobalAddedRules().get();
     final oldRuleIds = existingRules
         .where((r) =>
             (r.ruleAction == RuleAction.DOMAIN_SUFFIX ||
@@ -66,7 +64,7 @@ class WhitelistRuleSync {
       _log('Deleted ${oldRuleIds.length} old rules');
     }
 
-    // 添加域名白名单规则
+    // 添加规则到数据库
     int added = 0;
     for (final d in enabledDomains) {
       await database.rulesDao.putGlobalRule(Rule(
@@ -78,7 +76,6 @@ class WhitelistRuleSync {
       added++;
     }
 
-    // 添加进程白名单规则
     for (final p in enabledProcesses) {
       await database.rulesDao.putGlobalRule(Rule(
         ruleAction: RuleAction.PROCESS_NAME,
@@ -101,7 +98,7 @@ class WhitelistRuleSync {
         .toList();
     _log('Verified whitelist rules: ${whitelistRules.length}');
 
-    // 触发重载
+    // 延迟重载（2秒，确保 Riverpod 流更新）
     if (added > 0) {
       _scheduleReload();
     }
