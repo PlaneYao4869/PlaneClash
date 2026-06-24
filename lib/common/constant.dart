@@ -10,13 +10,13 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/material.dart';
 
 const appName = 'PlaneClash';
-const appHelperService = 'FlClashHelperService';
+const appHelperService = 'PlaneClashHelperService';
 const coreName = 'clash.meta';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const packageName = 'com.follow.clash';
-final unixSocketPath = '/tmp/FlClashSocket_${Random().nextInt(10000)}.sock';
-final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${Random().nextInt(10000)}';
+final unixSocketPath = '/tmp/PlaneClashSocket_${Random().nextInt(10000)}.sock';
+final windowsPipeName = '\\\\.\\pipe\\PlaneClashCore_${Random().nextInt(10000)}';
 const helperPort = 47890;
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -111,9 +111,9 @@ double getWidgetHeight(num lines) {
 
 const maxLength = 1000;
 
-const mainIsolate = 'FlClashMainIsolate';
+const mainIsolate = 'PlaneClashMainIsolate';
 
-const serviceIsolate = 'FlClashServiceIsolate';
+const serviceIsolate = 'PlaneClashServiceIsolate';
 
 const defaultPrimaryColors = [
   0xFF795548,

@@ -12,13 +12,13 @@ import 'common/common.dart';
 
 Future<void> _writeLog(String msg) async {
   try {
-    final file = File('${Platform.environment['TEMP'] ?? 'C:\\Windows\\Temp'}\\flclash_crash.log');
+    final file = File('${Platform.environment['TEMP'] ?? 'C:\\Windows\\Temp'}\\planeclash_crash.log');
     await file.writeAsString('${DateTime.now()}: $msg\n', mode: FileMode.append);
   } catch (_) {}
 }
 
 Future<void> main() async {
-  await _writeLog('=== FlClash starting ===');
+  await _writeLog('=== PlaneClash starting ===');
   try {
     await _writeLog('Step 1: WidgetsFlutterBinding');
     WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +35,7 @@ Future<void> main() async {
     final container = await globalState.init(version);
     
     await _writeLog('Step 5: HttpOverrides');
-    HttpOverrides.global = FlClashHttpOverrides();
+    HttpOverrides.global = PlaneClashHttpOverrides();
     
     await _writeLog('Step 6: runApp');
     runApp(
@@ -44,7 +44,7 @@ Future<void> main() async {
         child: const Application(),
       ),
     );
-    await _writeLog('=== FlClash started OK ===');
+    await _writeLog('=== PlaneClash started OK ===');
   } catch (e, s) {
     await _writeLog('CRASH: $e\n$s');
     return runApp(
